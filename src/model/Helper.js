@@ -41,4 +41,16 @@ export class Helper {
 
         return size
     }
+
+    static getPageTitle(title, homeName = true, seperate = null) {
+        let name;
+        if (seperate === null) {
+            seperate = ' ' + process.env.VUE_APP_TITLE_SEPARATE + ' '
+        }
+        if (homeName === true) {
+            name = process.env.VUE_APP_TITLE + seperate
+        }
+
+        return name + title
+    }
 }

@@ -31,11 +31,13 @@
 </template>
 
 <script>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, reactive, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useHead } from "@vueuse/head"
 import { User } from '../model/User'
 import { ContentLoader } from 'vue-content-loader'
 import UserSingle from '@/components/Users/Single'
+import { Helper } from '../model/Helper'
 
 export default {
     components: {
@@ -48,16 +50,38 @@ export default {
         const router = useRouter()
         const route = useRoute()
 
+        // Page Head
+        const pageData = reactive({
+            title: '',
+            description: `My beautiful website`,
+        })
+
         // Define Ref
         const loading = ref(true)
         const data = ref(null)
         const error = ref(null)
 
+        // Setup Page Header
+        useHead({
+            title: computed(() => pageData.title),
+            meta: [
+                {
+                    name: `description`,
+                    content: computed(() => pageData.description),
+                }
+            ],
+        })
+
         // on Mounted
         onMounted(() => {
             User.get(route.params.id).then((result) => {
                 if (result.success) {
+
+                    // Set data Value
                     data.value = result.data
+
+                    // Setup Page title
+                    pageData.title = Helper.getPageTitle(result.data.name)
                 } else {
                     error.value = result.message
                 }
@@ -66,9 +90,8 @@ export default {
             });
         })
 
-
         // Return
-        return { data, loading, error, route, router }
+        return { pageData, data, loading, error, route, router }
     }
 };
 </script>
