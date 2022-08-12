@@ -1,0 +1,14 @@
+{
+  "menu": {
+    "home": "Home",
+    "login": "Login",
+    "register": "Register",
+    "users": "Users",
+    "posts": "Posts"
+  },
+  "pagination": {
+    "next": "Next",
+    "prev": "Prev",
+    "back": "Back"
+  }
+}
