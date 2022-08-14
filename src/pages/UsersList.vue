@@ -43,7 +43,7 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { User } from '../model/User'
@@ -52,74 +52,61 @@ import { ContentLoader } from 'vue-content-loader'
 import UserSingle from '@/components/Users/Single'
 import Paginate from '@/components/Paginate'
 
-export default {
-    components: {
-        ContentLoader,
-        Paginate,
-        UserSingle
-    },
-    setup() {
+// Load Router
+const router = useRouter()
+const route = useRoute()
 
-        // Load Router
-        const router = useRouter()
-        const route = useRoute()
+// Define Ref
+const loading = ref(true)
+const data = ref(null)
+const error = ref(null)
 
-        // Define Ref
-        const loading = ref(true)
-        const data = ref(null)
-        const error = ref(null)
+// page Count
+const totalItems = ref(0)
+const pageCount = ref(0)
+const PerPage = ref(Helper.getPageSize(route, 4))
+const paged = ref(Helper.getPageNumber(route))
+const showPagination = ref(false)
 
-        // page Count
-        const totalItems = ref(0)
-        const pageCount = ref(0)
-        const PerPage = ref(Helper.getPageSize(route, 4))
-        const paged = ref(Helper.getPageNumber(route))
-        const showPagination = ref(false)
+// on Mounted
+onMounted(() => {
+    showUsers(paged.value, PerPage.value)
+})
 
-        // on Mounted
-        onMounted(() => {
-            showUsers(paged.value, PerPage.value)
-        })
-
-        // Methods
-        function showUsers(pageNumber, Limit) {
-            let params = {}
-            params[process.env.VUE_APP_PAGINATION_QUERY] = pageNumber
-            params[process.env.VUE_APP_PAGINATION_LIMIT_QUERY] = Limit
-            User.all(params).then((result) => {
-                if (result.success) {
-                    data.value = _.chunk(result.data, 2)
-                    totalItems.value = 10
-                    pageCount.value = Math.ceil(totalItems.value / PerPage.value)
-                    if (pageCount.value > 0) {
-                        showPagination.value = true
-                    }
-                } else {
-                    error.value = result.message
-                }
-
-                loading.value = false
-            });
-        }
-
-        function clickPaginate(pageNum) {
-            loading.value = true
-            //@see https://github.com/vuejs/vue-router/issues/1631
-            router.push({ name: 'users', query: { ...route.query, page: pageNum } })
-        }
-
-        // Change Query
-        watch(
-            () => route.query.page,
-            newValue => {
-                showUsers(newValue, PerPage.value)
+// Methods
+function showUsers(pageNumber, Limit) {
+    let params = {}
+    params[process.env.VUE_APP_PAGINATION_QUERY] = pageNumber
+    params[process.env.VUE_APP_PAGINATION_LIMIT_QUERY] = Limit
+    User.all(params).then((result) => {
+        if (result.success) {
+            data.value = _.chunk(result.data, 2)
+            totalItems.value = 10
+            pageCount.value = Math.ceil(totalItems.value / PerPage.value)
+            if (pageCount.value > 0) {
+                showPagination.value = true
             }
-        )
+        } else {
+            error.value = result.message
+        }
 
-        // Return
-        return { data, loading, error, paged, PerPage, pageCount, showPagination, showUsers, clickPaginate }
+        loading.value = false
+    });
+}
+
+function clickPaginate(pageNum) {
+    loading.value = true
+    //@see https://github.com/vuejs/vue-router/issues/1631
+    router.push({ name: 'users', query: { ...route.query, page: pageNum } })
+}
+
+// Change Query
+watch(
+    () => route.query.page,
+    newValue => {
+        showUsers(newValue, PerPage.value)
     }
-};
+)
 </script>
 
 <style>

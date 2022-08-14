@@ -26,7 +26,7 @@
                 {{ error }}
             </div>
 
-            <infinite-loading @infinite="infiniteHandler">
+            <infinite-loading @infinite="infiniteHandler" @distance="50">
                 <template #spinner>
                     <content-loader v-if="!error" class="content-loader" :speed="2" primaryColor="#f3f3f3"
                         secondaryColor="#ecebeb">
@@ -52,7 +52,7 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Helper } from '../model/Helper'
@@ -60,51 +60,39 @@ import { ContentLoader } from 'vue-content-loader'
 //@see https://github.com/PeachScript/vue-infinite-loading
 import InfiniteLoading from "vue-infinite-loading"
 
-export default {
-    components: {
-        ContentLoader,
-        InfiniteLoading
-    },
-    setup() {
+// Load Router
+const router = useRouter()
+const route = useRoute()
 
-        // Load Router
-        const router = useRouter()
-        const route = useRoute()
+// Define Ref
+const data = ref([])
+const error = ref(null)
 
-        // Define Ref
-        const data = ref([])
-        const error = ref(null)
+// page Count
+const totalItems = ref(0)
+const pageCount = ref(0)
+const PerPage = ref(Helper.getPageSize(route, 5))
+const paged = ref(Helper.getPageNumber(route))
 
-        // page Count
-        const totalItems = ref(0)
-        const pageCount = ref(0)
-        const PerPage = ref(Helper.getPageSize(route, 5))
-        const paged = ref(Helper.getPageNumber(route))
+// infiniteHandler Package Method
+function infiniteHandler($state) {
+    axios
+        .get('https://dummyjson.com/products', { params: { limit: PerPage.value, skip: (PerPage.value * paged.value) } })
+        .then((response) => {
+            let postsList = response.data.products;
+            if (postsList.length && paged.value < 5) {
+                data.value = [...data.value, ...postsList]
+                $state.loaded();
+            } else {
+                $state.complete();
+            }
 
-        // infiniteHandler Package Method
-        function infiniteHandler($state) {
-            axios
-                .get('https://dummyjson.com/products', { params: { limit: PerPage.value, skip: (PerPage.value * paged.value) } })
-                .then((response) => {
-                    let postsList = response.data.products;
-                    if (postsList.length && paged.value < 5) {
-                        data.value = [...data.value, ...postsList]
-                        $state.loaded();
-                    } else {
-                        $state.complete();
-                    }
-
-                    paged.value++;
-                })
-                .catch((e) => {
-                    error.value = "Problem Loaded"
-                });
-        }
-
-        // Return
-        return { data, error, paged, PerPage, pageCount, router, route, infiniteHandler }
-    }
-};
+            paged.value++;
+        })
+        .catch((e) => {
+            error.value = "Problem Loaded"
+        });
+}
 </script>
 
 <style>

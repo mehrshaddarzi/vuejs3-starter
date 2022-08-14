@@ -18,7 +18,7 @@
 
             <div class="text-right" v-if="!loading && data && data.id">
                 <div class="col-md-6 mb-3">
-                    <UserSingle :user="data" :show-link="false" />
+                    <UserSingle :user="data" :show-link="false" @myEmitName="emitFunction" />
                 </div>
             </div>
 
@@ -30,7 +30,7 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import { ref, onMounted, reactive, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useHead } from "@vueuse/head"
@@ -39,62 +39,57 @@ import { ContentLoader } from 'vue-content-loader'
 import UserSingle from '@/components/Users/Single'
 import { Helper } from '../model/Helper'
 
-export default {
-    components: {
-        ContentLoader,
-        UserSingle
-    },
-    setup() {
+// Load Router
+const router = useRouter()
+const route = useRoute()
 
-        // Load Router
-        const router = useRouter()
-        const route = useRoute()
+// Page Head
+const pageData = reactive({
+    title: '',
+    description: `My beautiful website`,
+})
 
-        // Page Head
-        const pageData = reactive({
-            title: '',
-            description: `My beautiful website`,
-        })
+// Define Ref
+const loading = ref(true)
+const data = ref(null)
+const error = ref(null)
 
-        // Define Ref
-        const loading = ref(true)
-        const data = ref(null)
-        const error = ref(null)
+// Setup Page Header
+useHead({
+    title: computed(() => pageData.title),
+    meta: [
+        {
+            name: `description`,
+            content: computed(() => pageData.description),
+        }
+    ],
+})
 
-        // Setup Page Header
-        useHead({
-            title: computed(() => pageData.title),
-            meta: [
-                {
-                    name: `description`,
-                    content: computed(() => pageData.description),
-                }
-            ],
-        })
+// on Mounted
+onMounted(() => {
+    User.get(route.params.id).then((result) => {
+        if (result.success) {
 
-        // on Mounted
-        onMounted(() => {
-            User.get(route.params.id).then((result) => {
-                if (result.success) {
+            // Set data Value
+            data.value = result.data
 
-                    // Set data Value
-                    data.value = result.data
+            // Setup Page title
+            pageData.title = Helper.getPageTitle(result.data.name)
+        } else {
+            error.value = result.message
+        }
 
-                    // Setup Page title
-                    pageData.title = Helper.getPageTitle(result.data.name)
-                } else {
-                    error.value = result.message
-                }
+        loading.value = false
+    });
+})
 
-                loading.value = false
-            });
-        })
-
-        // Return
-        return { pageData, data, loading, error, route, router }
+// Emit Function
+function emitFunction(data) {
+    if (route.name === "users.single") {
+        console.log(data)
     }
-};
+}
 </script>
 
-<style>
+<style scoped>
 </style>
