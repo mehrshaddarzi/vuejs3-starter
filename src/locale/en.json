@@ -10,5 +10,6 @@
     "next": "Next",
     "prev": "Prev",
     "back": "Back"
-  }
+  },
+  "404": "Page Not Found"
 }

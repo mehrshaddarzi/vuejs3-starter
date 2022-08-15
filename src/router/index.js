@@ -4,6 +4,7 @@ import UsersList from '../pages/UsersList.vue'
 import SingleUser from '../pages/SingleUser.vue'
 import PassThrough from '@/components/PassThrough.vue'
 import PostsList from '../pages/PostsList.vue'
+import FormClassic from '../pages/form/Classic.vue'
 
 const routes = [
   {
@@ -21,9 +22,10 @@ const routes = [
         component: UsersList,
       },
       {
-        path: ':id',
+        // @see https://router.vuejs.org/guide/essentials/route-matching-syntax.html#custom-regex-in-params
+        path: ':id(\\d+)',
         name: 'users.single',
-        component: SingleUser,
+        component: SingleUser
       }
     ]
   },
@@ -37,6 +39,26 @@ const routes = [
         component: PostsList,
       }
     ]
+  },
+  {
+    path: '/forms',
+    component: PassThrough,
+    children: [
+      {
+        path: '',
+        name: 'forms.classic',
+        component: FormClassic,
+      }
+    ]
+  },
+  {
+    path: '/404',
+    name: '404',
+    component: () => import('@/pages/404.vue'),
+  },
+  {
+    path: "/:catchAll(.*)",
+    redirect: '/404',
   },
   /*{
     path: '/about',

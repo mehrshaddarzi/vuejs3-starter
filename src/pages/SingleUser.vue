@@ -30,6 +30,16 @@
     </div>
 </template>
 
+<script>
+// https://github.com/vuejs/rfcs/discussions/302#discussioncomment-1629410
+export default {
+    beforeRouteEnter: function (to, from, next) {
+        console.log(to.params.id)
+        next()
+    }
+}
+</script>
+
 <script setup>
 import { ref, onMounted, reactive, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -76,6 +86,10 @@ onMounted(() => {
             // Setup Page title
             pageData.title = Helper.getPageTitle(result.data.name)
         } else {
+            // Redirect To 404
+            router.push({ name: '404' });
+
+            // Console Log
             error.value = result.message
         }
 

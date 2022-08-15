@@ -1,3 +1,8 @@
+// Vue2-Animate https://github.com/asika32764/vue2-animate
+$animationDuration: 1s;
+@import "~vue2-animate/src/sass/vue2-animate.scss";
+
+// Bootstrap
 @import "custom";
 @import "utility";
 @import "font";
